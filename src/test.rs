@@ -1,7 +1,7 @@
 #[cfg(test)]
 use serde_json;
 #[cfg(test)]
-use container::{Container, ContainerInfo};
+use container::{Container, ContainerInfo, HostConfig, Device};
 #[cfg(test)]
 use process::{Top};
 #[cfg(test)]
@@ -24,6 +24,8 @@ use hyper::Url;
 use hyper::http::h1::{Http11Message, HttpWriter};
 #[cfg(test)]
 use std::io::Write;
+#[cfg(test)]
+use Docker;
 
 #[test]
 #[cfg(test)]
@@ -121,6 +123,31 @@ fn get_version(){
         Ok(body) => body,
         Err(_) => { assert!(false); return; }
     };
+}
+
+#[test]
+#[cfg(test)]
+fn create_container () {
+    let docker = Docker::connect_with_defaults().unwrap();
+    let container = Container{
+        Id: "".to_string(),
+        Image: "ubuntu:18.04".to_string(),
+        Status: "".to_string(),
+        Command: "".to_string(),
+        Created: 0,
+        Names: vec![],
+        Ports: vec![],
+        SizeRw: None,
+        SizeRootFs: None,
+        Labels: None,
+        HostConfig: HostConfig {
+            NetworkMode : "".to_string(),
+            Mounts: vec![],
+            Devices: vec![]
+        }
+    };
+    let container_creation_response = docker.create_container(&container);
+
 }
 
 #[cfg(test)]

@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::io::{self, Read};
 use hyper;
+use hyper::header::{Headers, ContentLength, ContentType, Accept, Host, UserAgent};
 use hyper::Client;
 use hyper::client::{RequestBuilder, Body};
 use hyper::client::pool::{Config, Pool};
@@ -33,6 +34,7 @@ use version::Version;
 
 use serde::de::DeserializeOwned;
 use serde_json;
+use hyper::error::Error::Header;
 
 /// The default `DOCKER_HOST` address that we will try to connect to.
 #[cfg(unix)]
@@ -205,6 +207,10 @@ impl Docker {
 
     fn execute_request(&self, request: RequestBuilder) -> Result<String> {
         let mut response = try!(request.send());
+        println!("{}",response.status);
+        let mut body = String::new();
+        try!(response.read_to_string(&mut body));
+        println!("{}", body);
         assert!(response.status.is_success());
 
         let mut body = String::new();
@@ -357,12 +363,25 @@ impl Docker {
     pub fn create_container(&self, container: &Container) -> Result<String>
     {
         let mut request_string = serde_json::to_string(&container).unwrap();
+        println!("{}", request_string.len());
         let url = "/containers/create".to_string();
         let request_url= self.get_url(&url);
+        let mut headers = Headers::new();
+        let host = Host {
+            hostname : "v1.24".to_owned(),
+            port: None
+        };
+        headers.set(Accept::star());
+        headers.set(ContentLength(request_string.len() as u64));
+        headers.set(ContentType::json());
+        headers.set(host);
+        headers.set(UserAgent("hyper/0.5.2".to_owned()));
 
 
-        let mut request_builder = self.build_post_request(&request_url);
+        let mut request_builder = self.build_post_request(&request_url)
+            .headers(headers);
         let request = request_builder.body(&request_string);
+
         let response_body = try!(self.execute_request(request));
         Ok(response_body)
 
