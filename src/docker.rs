@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::io::{self, Read};
 use hyper;
 use hyper::Client;
-use hyper::client::RequestBuilder;
+use hyper::client::{RequestBuilder, Body};
 use hyper::client::pool::{Config, Pool};
 use hyper::client::response::Response;
 use hyper::net::HttpConnector;
@@ -353,6 +353,37 @@ impl Docker {
         let response = try!(self.start_request(request));
         Ok(response)
     }
+
+    pub fn create_container(&self, container: &Container) -> Result<String>
+    {
+        let mut request_string = serde_json::to_string(&container).unwrap();
+        let url = "/containers/create".to_string();
+        let request_url= self.get_url(&url);
+
+
+        let mut request_builder = self.build_post_request(&request_url);
+        let request = request_builder.body(&request_string);
+        let response_body = try!(self.execute_request(request));
+        Ok(response_body)
+
+    }
+
+    pub fn start_container(&self, container_id: &str) -> Result<String>
+    {
+        let url = format!("/containers/{}/start", container_id);
+        let request_builder = self.build_post_request(&url);
+        let response_body = try!(self.execute_request(request_builder));
+        Ok(response_body)
+    }
+
+    pub fn stop_container(&self, container_id: &str) -> Result<String>
+    {
+        let url = format!("/containers/{}/stop", container_id);
+        let request_builder = self.build_post_request(&url);
+        let response_body = try!(self.execute_request(request_builder));
+        Ok(response_body)
+    }
+
 
     pub fn ping(&self) -> Result<String> {
         let request_url = self.get_url(&format!("/_ping"));

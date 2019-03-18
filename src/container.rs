@@ -31,7 +31,17 @@ pub struct Port {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 pub struct HostConfig {
-    pub NetworkMode: String
+    pub NetworkMode: String,
+    pub Mounts: Vec<Mount>,
+    pub Devices: Vec<Device>
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(non_snake_case)]
+pub struct Device {
+    pub PathOnHost: String,
+    pub PathOnContainer: String,
+    pub CgroupPermissions: String
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
