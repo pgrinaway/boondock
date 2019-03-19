@@ -150,6 +150,64 @@ fn create_container () {
 
 }
 
+#[test]
+#[cfg(test)]
+fn start_container () {
+    let docker = Docker::connect_with_defaults().unwrap();
+    let container = Container{
+        Id: "".to_string(),
+        Image: "ubuntu:18.04".to_string(),
+        Status: "".to_string(),
+        Command: "".to_string(),
+        Created: 0,
+        Names: vec![],
+        Ports: vec![],
+        SizeRw: None,
+        SizeRootFs: None,
+        Labels: None,
+        HostConfig: HostConfig {
+            NetworkMode : "".to_string(),
+            Mounts: vec![],
+            Devices: vec![]
+        }
+    };
+
+    let container_creation_response = docker.create_container(&container).unwrap();
+
+    let container_start_response = docker.start_container(&container_creation_response.Id).unwrap();
+
+}
+
+#[test]
+#[cfg(test)]
+fn stop_container () {
+    let docker = Docker::connect_with_defaults().unwrap();
+    let container = Container{
+        Id: "".to_string(),
+        Image: "ubuntu:18.04".to_string(),
+        Status: "".to_string(),
+        Command: "".to_string(),
+        Created: 0,
+        Names: vec![],
+        Ports: vec![],
+        SizeRw: None,
+        SizeRootFs: None,
+        Labels: None,
+        HostConfig: HostConfig {
+            NetworkMode : "".to_string(),
+            Mounts: vec![],
+            Devices: vec![]
+        }
+    };
+
+    let container_creation_response = docker.create_container(&container).unwrap();
+
+    let container_start_response = docker.start_container(&container_creation_response.Id).unwrap();
+
+    let container_stop_response = docker.stop_container(&container_creation_response.Id).unwrap();
+
+}
+
 #[cfg(test)]
 fn get_containers_response() -> String {
     return "[{\"Id\":\"ed3221f4adc05b9ecfbf56b1aa76d4e6e70d5b73b3876c322fc10d017c64ca86\",\"Names\":[\"/rust\"],\"Image\":\"ghmlee/rust:latest\",\"Command\":\"bash\",\"Created\":1439434052,\"Ports\":[{\"IP\":\"0.0.0.0\",\"PrivatePort\":8888,\"PublicPort\":8888,\"Type\":\"tcp\"}],\"SizeRootFs\":253602755,\"Labels\":{},\"Status\":\"Exited (137) 12 hours ago\",\"HostConfig\":{\"NetworkMode\":\"default\"},\"SizeRw\":10832473}]".to_string();

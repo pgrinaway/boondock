@@ -387,10 +387,12 @@ impl Docker {
 
     }
 
+
     pub fn start_container(&self, container_id: &str) -> Result<String>
     {
         let url = format!("/containers/{}/start", container_id);
-        let request_builder = self.build_post_request(&url);
+        let request_url = self.get_url(&url);
+        let request_builder = self.build_post_request(&request_url);
         let response_body = try!(self.execute_request(request_builder));
         Ok(response_body)
     }
@@ -398,7 +400,8 @@ impl Docker {
     pub fn stop_container(&self, container_id: &str) -> Result<String>
     {
         let url = format!("/containers/{}/stop", container_id);
-        let request_builder = self.build_post_request(&url);
+        let request_url: String = self.get_url(&url);
+        let request_builder = self.build_post_request(&request_url);
         let response_body = try!(self.execute_request(request_builder));
         Ok(response_body)
     }
