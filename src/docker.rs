@@ -23,7 +23,7 @@ use openssl::x509::X509FileType;
 use unix::HttpUnixConnector;
 
 use errors::*;
-use container::{Container, ContainerInfo};
+use container::{Container, ContainerInfo, ContainerCreationResult};
 use options::*;
 use process::{Process, Top};
 use stats::StatsReader;
@@ -207,14 +207,11 @@ impl Docker {
 
     fn execute_request(&self, request: RequestBuilder) -> Result<String> {
         let mut response = try!(request.send());
-        println!("{}",response.status);
+        println!("The Response: {:#?}",response);
         let mut body = String::new();
         try!(response.read_to_string(&mut body));
         println!("{}", body);
         assert!(response.status.is_success());
-
-        let mut body = String::new();
-        try!(response.read_to_string(&mut body));
         Ok(body)
     }
 
@@ -360,22 +357,22 @@ impl Docker {
         Ok(response)
     }
 
-    pub fn create_container(&self, container: &Container) -> Result<String>
+    pub fn create_container(&self, container: &Container) -> Result<ContainerCreationResult>
     {
+        let images = self.images(false).unwrap();
+
+        let image_name_tag = container.Image.clone();
+        let mut split = image_name_tag.split(":");
+        let splits: Vec<&str> = split.collect();
+
+        self.create_image(splits[0].to_string(), splits[1].to_string());
+
         let mut request_string = serde_json::to_string(&container).unwrap();
-        println!("{}", request_string.len());
+
         let url = "/containers/create".to_string();
         let request_url= self.get_url(&url);
         let mut headers = Headers::new();
-        let host = Host {
-            hostname : "v1.24".to_owned(),
-            port: None
-        };
-        headers.set(Accept::star());
-        headers.set(ContentLength(request_string.len() as u64));
         headers.set(ContentType::json());
-        headers.set(host);
-        headers.set(UserAgent("hyper/0.5.2".to_owned()));
 
 
         let mut request_builder = self.build_post_request(&request_url)
@@ -383,7 +380,10 @@ impl Docker {
         let request = request_builder.body(&request_string);
 
         let response_body = try!(self.execute_request(request));
-        Ok(response_body)
+
+        let container_response : ContainerCreationResult = serde_json::from_str(&response_body).unwrap();
+
+        Ok(container_response)
 
     }
 

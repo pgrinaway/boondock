@@ -38,6 +38,13 @@ pub struct HostConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(non_snake_case)]
+pub struct ContainerCreationResult {
+    pub Id: String,
+    pub Warnings: Option<String>
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(non_snake_case)]
 pub struct Device {
     pub PathOnHost: String,
     pub PathOnContainer: String,

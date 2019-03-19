@@ -146,7 +146,7 @@ fn create_container () {
             Devices: vec![]
         }
     };
-    let container_creation_response = docker.create_container(&container);
+    let container_creation_response = docker.create_container(&container).unwrap();
 
 }
 
